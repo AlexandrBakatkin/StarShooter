@@ -15,7 +15,6 @@ public class MenuScreen extends BaseScreen {
     private Vector2 move;
     private final int SPEED = 2;                //Задаем скорость перемещения космического корабля
 
-
     @Override
     public void show() {
         super.show();
@@ -54,6 +53,31 @@ public class MenuScreen extends BaseScreen {
     public void dispose() {
         super.dispose();
         img.dispose();
+    }
+
+    @Override
+    public boolean keyDown(int keycode) {
+        float x;
+        float y;
+
+        x = pos.x;
+        y = pos.y;
+
+        switch (keycode){
+            case 29:
+                pos.set(x - 2, y);
+                break;
+            case 32:
+                pos.set(x + 2, y);
+                break;
+            case 51:
+                pos.set(x, y + 2);
+                break;
+            case 47:
+                pos.set(x, y - 2);
+                break;
+        }
+        return super.keyDown(keycode);
     }
 
     @Override
