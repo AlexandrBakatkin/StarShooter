@@ -1,6 +1,7 @@
 package ru.bakatkin.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
@@ -13,7 +14,7 @@ public class MenuScreen extends BaseScreen {
     private Vector2 touch;
     private Vector2 pos;
     private Vector2 move;
-    private final int SPEED = 2;                //Задаем скорость перемещения космического корабля
+    private final float SPEED = 0.01f;                //Задаем скорость перемещения космического корабля
 
     @Override
     public void show() {
@@ -22,7 +23,7 @@ public class MenuScreen extends BaseScreen {
         touch = new Vector2();
         pos = new Vector2();
         move = new Vector2();
-        pos.set(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/10);
+        pos.set(0f, -0.4f);
         touch.set(pos);
     }
 
@@ -35,7 +36,7 @@ public class MenuScreen extends BaseScreen {
 
         move();
 
-        batch.draw(img, pos.x, pos.y);
+        batch.draw(img, pos.x, pos.y, 0.1f, 0.1f);
         batch.end();
     }
 
@@ -65,36 +66,27 @@ public class MenuScreen extends BaseScreen {
 
         switch (keycode){
             case 29:
-                pos.set(x - 2, y);
+                pos.set(x - 0.01f, y);
                 break;
             case 32:
-                pos.set(x + 2, y);
+                pos.set(x + 0.01f, y);
                 break;
             case 51:
-                pos.set(x, y + 2);
+                pos.set(x, y + 0.01f);
                 break;
             case 47:
-                pos.set(x, y - 2);
+                pos.set(x, y - 0.01f);
                 break;
         }
         return super.keyDown(keycode);
     }
 
     @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+    public boolean touchDown(Vector2 touch, int pointer, int button) {
+        this.touch = touch;
         move.set(pos);
-        touch.set(screenX, Gdx.graphics.getHeight() - screenY);
-        System.out.println("touch.x = " + touch.x + " touch.y = " + touch.y);
         move.sub(touch);
-        System.out.println(move.x + " " + move.y);
-        System.out.println(move.len());
-        prepareVector(move);
-        System.out.println(move.len());
-        return true;
-    }
-
-    public Vector2 prepareVector(Vector2 vector){
-        vector.setLength(SPEED);
-        return vector;
+        move.setLength(SPEED);
+        return false;
     }
 }
