@@ -23,7 +23,7 @@ public class MenuScreen extends BaseScreen {
         touch = new Vector2();
         pos = new Vector2();
         move = new Vector2();
-        pos.set(0f, -0.4f);
+        pos.set(0f, 0f);
         touch.set(pos);
     }
 
@@ -78,7 +78,32 @@ public class MenuScreen extends BaseScreen {
                 pos.set(x, y - 0.01f);
                 break;
         }
-        return super.keyDown(keycode);
+        return false;
+    }
+
+    @Override
+    public boolean keyUp(int keycode) {
+        float x;
+        float y;
+
+        x = pos.x;
+        y = pos.y;
+
+        switch (keycode){
+            case 29:
+                pos.set(x - 0.01f, y);
+                break;
+            case 32:
+                pos.set(x + 0.01f, y);
+                break;
+            case 51:
+                pos.set(x, y + 0.01f);
+                break;
+            case 47:
+                pos.set(x, y - 0.01f);
+                break;
+        }
+        return false;
     }
 
     @Override
