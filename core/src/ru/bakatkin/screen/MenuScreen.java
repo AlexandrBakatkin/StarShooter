@@ -1,14 +1,19 @@
 package ru.bakatkin.screen;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 import ru.bakatkin.base.BaseScreen;
+import ru.bakatkin.math.Rect;
+import ru.bakatkin.sprite.Background;
 
 public class MenuScreen extends BaseScreen {
+
+    private Texture bg;
+    private Background background;
 
     private Texture img;
     private Vector2 touch;
@@ -20,6 +25,8 @@ public class MenuScreen extends BaseScreen {
     public void show() {
         super.show();
         img = new Texture("spaceship.png");
+        bg = new Texture("textures/bg.png");
+        background = new Background(new TextureRegion(bg));
         touch = new Vector2();
         pos = new Vector2();
         move = new Vector2();
@@ -28,16 +35,16 @@ public class MenuScreen extends BaseScreen {
     }
 
     @Override
+    public void resize(Rect worldBounds) {
+        background.resize(worldBounds);
+    }
+
+    @Override
     public void render(float delta) {
         super.render(delta);
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        batch.begin();
+        update();
+        draw();
 
-        move();
-
-        batch.draw(img, pos.x, pos.y, 0.1f, 0.1f);
-        batch.end();
     }
 
     private void move() {
@@ -53,6 +60,7 @@ public class MenuScreen extends BaseScreen {
     @Override
     public void dispose() {
         super.dispose();
+        bg.dispose();
         img.dispose();
     }
 
@@ -113,5 +121,21 @@ public class MenuScreen extends BaseScreen {
         move.sub(touch);
         move.setLength(SPEED);
         return false;
+    }
+
+    private void update (){
+
+    }
+
+    private void draw (){
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        batch.begin();
+        background.draw(batch);
+
+        move();
+
+        batch.draw(img, pos.x, pos.y, 0.1f, 0.1f);
+        batch.end();
     }
 }
