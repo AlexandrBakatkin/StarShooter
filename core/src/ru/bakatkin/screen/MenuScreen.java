@@ -1,25 +1,45 @@
 package ru.bakatkin.screen;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 import ru.bakatkin.base.BaseScreen;
 import ru.bakatkin.math.Rect;
 import ru.bakatkin.sprite.Background;
+import ru.bakatkin.sprite.ButtonExit;
+import ru.bakatkin.sprite.ButtonPlay;
+import ru.bakatkin.sprite.Star;
+
+import static com.badlogic.gdx.Input.Keys.ENTER;
+import static com.badlogic.gdx.Input.Keys.ESCAPE;
+import static com.badlogic.gdx.Input.Keys.HOME;
 
 public class MenuScreen extends BaseScreen {
 
+    private Game game;
+
     private Texture bg;
     private Background background;
+    private TextureAtlas atlas;
+    private Star[] stars;
+    private int STAR_COUNT = 256;
+    private Music musicMenu;
+
+    private ButtonExit buttonExit;
+    private ButtonPlay buttonPlay;
 
     private Texture img;
-    private Vector2 touch;
-    private Vector2 pos;
-    private Vector2 move;
-    private final float SPEED = 0.01f;                //Задаем скорость перемещения космического корабля
+
+
+    public MenuScreen(Game game) {
+        this.game = game;
+    }
 
     @Override
     public void show() {
@@ -27,104 +47,65 @@ public class MenuScreen extends BaseScreen {
         img = new Texture("spaceship.png");
         bg = new Texture("textures/bg.png");
         background = new Background(new TextureRegion(bg));
-        touch = new Vector2();
-        pos = new Vector2();
-        move = new Vector2();
-        pos.set(0f, 0f);
-        touch.set(pos);
+        atlas = new TextureAtlas("textures/menuAtlas.tpack");
+        stars = new Star[STAR_COUNT];
+        for (int i = 0; i < STAR_COUNT; i++) {
+            stars[i] = new Star(atlas);
+        }
+        buttonExit = new ButtonExit(atlas);
+        buttonPlay = new ButtonPlay(atlas, game);
+        musicMenu = Gdx.audio.newMusic(Gdx.files.internal("sound/a31df44c3944ea6.mp3"));
+        musicMenu.play();
     }
 
     @Override
     public void resize(Rect worldBounds) {
         background.resize(worldBounds);
+
+        for (Star star: stars
+             ) {
+            star.resize(worldBounds);
+        }
+        buttonExit.resize(worldBounds);
+        buttonPlay.resize(worldBounds);
     }
 
     @Override
     public void render(float delta) {
         super.render(delta);
-        update();
+        update(delta);
         draw();
-
-    }
-
-    private void move() {
-        Vector2 dest = new Vector2();           //Вводим новый вектор, который отслеживает расстояние от корабля до точки назначения
-        dest.set(pos);
-        dest.sub(touch);
-
-        if(dest.len() > SPEED){
-            pos.sub(move);
-        }
     }
 
     @Override
     public void dispose() {
         super.dispose();
+        atlas.dispose();
         bg.dispose();
         img.dispose();
-    }
-
-    @Override
-    public boolean keyDown(int keycode) {
-        float x;
-        float y;
-
-        x = pos.x;
-        y = pos.y;
-
-        switch (keycode){
-            case 29:
-                pos.set(x - 0.01f, y);
-                break;
-            case 32:
-                pos.set(x + 0.01f, y);
-                break;
-            case 51:
-                pos.set(x, y + 0.01f);
-                break;
-            case 47:
-                pos.set(x, y - 0.01f);
-                break;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean keyUp(int keycode) {
-        float x;
-        float y;
-
-        x = pos.x;
-        y = pos.y;
-
-        switch (keycode){
-            case 29:
-                pos.set(x - 0.01f, y);
-                break;
-            case 32:
-                pos.set(x + 0.01f, y);
-                break;
-            case 51:
-                pos.set(x, y + 0.01f);
-                break;
-            case 47:
-                pos.set(x, y - 0.01f);
-                break;
-        }
-        return false;
+        musicMenu.dispose();
     }
 
     @Override
     public boolean touchDown(Vector2 touch, int pointer, int button) {
-        this.touch = touch;
-        move.set(pos);
-        move.sub(touch);
-        move.setLength(SPEED);
+        buttonExit.touchDown(touch, pointer, button);
+        buttonPlay.touchDown(touch, pointer, button);
         return false;
     }
 
-    private void update (){
+    @Override
+    public boolean touchUp(Vector2 touch, int pointer, int button) {
+        buttonExit.touchUp(touch, pointer, button);
+        buttonPlay.touchUp(touch, pointer, button);
+        return false;
+    }
 
+    private void update (float delta){
+
+        for (Star star: stars
+        ) {
+            star.update(delta);
+        }
     }
 
     private void draw (){
@@ -133,9 +114,27 @@ public class MenuScreen extends BaseScreen {
         batch.begin();
         background.draw(batch);
 
-        move();
+        for (Star star: stars
+        ) {
+            star.draw(batch);
+        }
 
-        batch.draw(img, pos.x, pos.y, 0.1f, 0.1f);
+        buttonExit.draw(batch);
+        buttonPlay.draw(batch);
+
         batch.end();
+    }
+
+    @Override
+    public boolean keyDown(int keycode) {
+        switch (keycode){
+            case ENTER:
+                game.setScreen(new GameScreen());
+            case ESCAPE:
+                Gdx.app.exit();
+            case HOME:
+                Gdx.app.exit();
+        }
+        return false;
     }
 }
