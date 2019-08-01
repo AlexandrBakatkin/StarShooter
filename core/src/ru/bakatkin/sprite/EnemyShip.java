@@ -11,7 +11,11 @@ import ru.bakatkin.pool.BulletPool;
 
 public class EnemyShip extends Ship {
 
-    private final float SPEED = 0.0005f;
+    private enum State {DESCENT, FIGHT}
+    private State state;
+
+    private final float SPEED_FIGHT = 0.005f;
+    private final float SPEED_DESCENT = 0.05f;
 
     public EnemyShip(BulletPool bulletPool, Rect worldBounds) {
         this.bulletPool = bulletPool;
@@ -20,21 +24,35 @@ public class EnemyShip extends Ship {
         bulletVelocity = new Vector2();
         this.worldBounds = worldBounds;
         reloadInterval = 0.01f;
+        state = State.DESCENT;
     }
 
     @Override
     public void update(float delta) {
-       move();
-        reloadTimer += delta;
-        if (reloadTimer >= reloadInterval){
-            reloadTimer = 0f;
-            shot();
-            System.out.println("Shot");
+        switch (state) {
+            case DESCENT:
+                if (getTop() <= worldBounds.getTop()) {
+                    move(SPEED_DESCENT);
+                    state = State.FIGHT;
+                }
+                move(SPEED_DESCENT);
+                break;
+            case FIGHT:
+                reloadTimer += delta;
+                if (reloadTimer >= reloadInterval) {
+                    reloadTimer = 0f;
+                    shot();
+                }
+                move(SPEED_FIGHT);
+                if (getBottom() < worldBounds.getBottom()) {
+                    destroy();
+                }
+                break;
         }
     }
 
-    private void move() {
-        pos.add(move.setLength(SPEED));
+    private void move(float speed) {
+        pos.add(move.setLength(speed));
     }
 
     public void set(TextureRegion[] textureRegions,
@@ -55,5 +73,6 @@ public class EnemyShip extends Ship {
         this.reloadInterval = reloadInterval;
         setHeightProportion(height);
         this.hp = hp;
+        state = State.DESCENT;
     }
 }
