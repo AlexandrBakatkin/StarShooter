@@ -1,7 +1,7 @@
 package ru.bakatkin.screen;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -17,6 +17,7 @@ import ru.bakatkin.sprite.Background;
 import ru.bakatkin.sprite.Bullet;
 import ru.bakatkin.sprite.EnemyShip;
 import ru.bakatkin.sprite.GameOver;
+import ru.bakatkin.sprite.NewGameButton;
 import ru.bakatkin.sprite.SpaceShip;
 import ru.bakatkin.sprite.Star;
 import ru.bakatkin.utils.EnemyGenerator;
@@ -37,10 +38,17 @@ public class GameScreen extends BaseScreen {
 
     private SpaceShip spaceShip;
     private GameOver gameOver;
+    private NewGameButton newGameButton;
 
     private enum State {PLAYING, PAUSED, GAME_OVER}
     private State state = State.PLAYING;
     private State prevState = State.PLAYING;
+
+    private Game game;
+
+    public GameScreen(Game game) {
+        this.game = game;
+    }
 
     @Override
     public void show() {
@@ -60,6 +68,7 @@ public class GameScreen extends BaseScreen {
         enemyGenerator = new EnemyGenerator(enemyPool, atlas, worldBounds);
         spaceShip = new SpaceShip(atlas, explosionPool, bulletPool);
         gameOver = new GameOver(atlas);
+        newGameButton = new NewGameButton(atlas, game);
     }
 
     @Override
@@ -125,6 +134,7 @@ public class GameScreen extends BaseScreen {
         }
         spaceShip.resize(worldBounds);
         gameOver.resize(worldBounds);
+        newGameButton.resize(worldBounds);
     }
 
     @Override
@@ -138,20 +148,27 @@ public class GameScreen extends BaseScreen {
         explosionPool.dispose();
         explosionSound.dispose();
         gameOver.dispose();
+        newGameButton.dispose();
     }
 
     @Override
     public boolean touchDown(Vector2 touch, int pointer, int button) {
-        if(state == State.PLAYING){
+        if (state == State.PLAYING){
             spaceShip.touchDown(touch, pointer ,button);
+        }
+        if (state == State.GAME_OVER){
+            newGameButton.touchDown(touch, pointer, button);
         }
         return false;
     }
 
     @Override
     public boolean touchUp(Vector2 touch, int pointer, int button) {
-        if(state == State.PLAYING){
+        if (state == State.PLAYING){
             spaceShip.touchUp(touch, pointer ,button);
+        }
+        if (state == State.GAME_OVER){
+            newGameButton.touchUp(touch, pointer, button);
         }
         return false;
     }
@@ -175,9 +192,6 @@ public class GameScreen extends BaseScreen {
             enemyGenerator.generate(delta);
             bulletPool.updateActiveSprites(delta);
             enemyPool.updateActiveSprites(delta);
-        }
-        if (state == State.GAME_OVER) {
-            gameOver.update(delta);
         }
     }
 
@@ -203,6 +217,7 @@ public class GameScreen extends BaseScreen {
         }
         if(state == State.GAME_OVER){
             gameOver.draw(batch);
+            newGameButton.draw(batch);
         }
         explosionPool.drawActiveSprites(batch);
         batch.end();
